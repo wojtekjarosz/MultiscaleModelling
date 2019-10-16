@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="497.0" prefWidth="728.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+   <children>
+      <SplitPane dividerPositions="0.6906354515050167" layoutX="200.0" layoutY="127.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <SplitPane dividerPositions="0.9391480730223124" orientation="VERTICAL" prefHeight="495.0" prefWidth="497.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <items>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                           <children>
+                              <ScrollPane prefHeight="398.0" prefWidth="445.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <content>
+                                  <AnchorPane prefHeight="392.0" prefWidth="435.0">
+                                       <children>
+                                          <Canvas fx:id="canvas" height="475.0" width="481.0" />
+                                       </children>
+                                    </AnchorPane>
+                                </content>
+                              </ScrollPane>
+                           </children>
+                        </AnchorPane>
+                      <AnchorPane maxHeight="25.0" minHeight="25.0" minWidth="0.0" prefHeight="25.0" prefWidth="160.0">
+                           <children>
+                              <ProgressBar fx:id="progressBar" layoutX="32.0" layoutY="2.0" prefHeight="26.0" prefWidth="495.0" progress="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                    </items>
+                  </SplitPane>
+               </children>
+            </AnchorPane>
+          <AnchorPane maxWidth="190.0" minHeight="0.0" minWidth="190.0" prefHeight="398.0" prefWidth="190.0">
+               <children>
+                  <TextField layoutX="7.0" layoutY="24.0" prefHeight="31.0" prefWidth="77.0" fx:id="xTextField" />
+                  <TextField fx:id="yTextField" layoutX="103.0" layoutY="24.0" prefHeight="31.0" prefWidth="77.0" />
+                  <Button layoutX="7.0" layoutY="69.0" mnemonicParsing="false" onAction="#generate" prefHeight="31.0" prefWidth="172.0" text="GENERATE" />
+                  <CheckBox fx:id="checkbox" layoutX="7.0" layoutY="126.0" mnemonicParsing="false" prefHeight="21.0" prefWidth="172.0" text="periodic" />
+                  <Button fx:id="startButton" layoutX="7.0" layoutY="217.0" mnemonicParsing="false" onAction="#handleStart" prefHeight="31.0" prefWidth="172.0" text="START" />
+                  <Button layoutX="7.0" layoutY="170.0" mnemonicParsing="false" onAction="#handleRand" prefHeight="31.0" prefWidth="172.0" text="RANDOM" />
+                  <Button layoutX="7.0" layoutY="264.0" mnemonicParsing="false" onAction="#handleClear" prefHeight="31.0" prefWidth="172.0" text="CLEAR CANVAS" />
+                  <MenuButton layoutX="7.0" layoutY="308.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="172.0" text="EXPORT">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#exportToBMP" text="Export to BMP" />
+                      <MenuItem mnemonicParsing="false" onAction="#exportToTXT" text="Export to TXT" />
+                    </items>
+                  </MenuButton>
+                  <ChoiceBox fx:id="choiceBox" layoutX="36.0" layoutY="433.0" prefWidth="150.0" visible="false" />
+                  <TextField fx:id="textField" layoutX="36.0" layoutY="392.0" visible="false" />
+                  <MenuButton layoutX="7.0" layoutY="351.0" mnemonicParsing="false" prefHeight="31.0" prefWidth="172.0" text="IMPORT">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#importFromBMP" text="Import from BMP" />
+                      <MenuItem mnemonicParsing="false" onAction="#importFromTXT" text="Import from TXT" />
+                    </items>
+                  </MenuButton>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>
