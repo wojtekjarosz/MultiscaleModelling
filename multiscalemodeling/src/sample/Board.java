@@ -135,7 +135,7 @@ public class Board {
         return isFinished();
     }
 
-    private boolean isFinished() {
+    public boolean isFinished() {
         boolean value = true;
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -216,8 +216,52 @@ public class Board {
         if (neighbours.containsKey(type)) {
             int count = neighbours.get(type);
             neighbours.put(type, count + 1);
-        } else if (type != 0) {
+        } else if (type != 0 && type != -1) {
             neighbours.put(type, 1);
         }
+    }
+
+    public boolean isCellOnBorder(int i, int j){
+        boolean isOnBorder = false;
+        int type=0;
+        int currentType = cells[i][j].getGrainType();
+        if (!period) {
+
+            int left = Math.max(i - 1, 0);
+            int up = Math.max(j - 1, 0);
+            int right = Math.min(i + 1, width - 1);
+            int down = Math.min(j + 1, height - 1);
+            int[] x= {left,i,right,i};
+            int[] y= {j, up, j, down};
+            for (int k = 0; k < 4; k++) {
+
+                type = cells[x[k]][y[k]].getGrainType();
+                if(type != currentType)
+                    isOnBorder = true;
+            }
+        } else {
+            //periodycznie
+            int left = i - 1;
+            int up = j - 1;
+            int right = i + 1;
+            int down = j + 1;
+            int[] x= {left,i,right,i};
+            int[] y= {j, up, j, down};
+            int tmpX, tmpY;
+            for (int k = 0; k < 4; k++) {
+                tmpX = x[k];
+                tmpY = y[k];
+                if (x[k] == -1) tmpX = width - 1;
+                if (x[k] == width) tmpX = 0;
+                if (y[k] == -1) tmpY = height - 1;
+                if (y[k] == height) tmpY = 0;
+
+                type = cells[tmpX][tmpY].getGrainType();
+                if(type != currentType)
+                    isOnBorder = true;
+            }
+        }
+
+        return isOnBorder;
     }
 }
