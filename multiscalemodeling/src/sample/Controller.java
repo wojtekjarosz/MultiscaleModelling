@@ -61,6 +61,8 @@ public class Controller {
     TextField inclusionsSizeTextField;
     @FXML
     ChoiceBox inclusionsTypeChoiceBox;
+    @FXML
+    TextField rule4Probability;
 
     GraphicsContext gc;
     Random rand;
@@ -84,12 +86,15 @@ public class Controller {
     @FXML
     public void initialize() {
         rand = new Random();
-        xTextField.setText("300");
-        yTextField.setText("300");
+        xTextField.setText("150");
+        yTextField.setText("150");
+        rule4Probability.setText("10");
         inclusionsAmountTextField.setText("5");
         inclusionsSizeTextField.setText("3");
         inclusionsTypeChoiceBox.getItems().addAll("square","circle");
         inclusionsTypeChoiceBox.setValue("square");
+        choiceBox.getItems().addAll("Moore'a", "von Neumann'a");
+        choiceBox.setValue("Moore'a");
         //rTextField.setVisible(true);
         //rTextField.setText("5");
         generate();
@@ -112,9 +117,7 @@ public class Controller {
                     rTextField.setVisible(true);
                 else rTextField.setVisible(false);
             });*/
-            choiceBox.getItems().addAll("Moore'a", "von Neumann'a", "Pentagonalne losowe", "Pentagonalne lewe", "Pentagonalne prawe",
-                    "Pentagonalne górne", "Pentagonalne dolne", "Heksagonalne losowe", "Heksagonalne lewe", "Heksagonalne prawe");
-            choiceBox.setValue("von Neumann'a");
+
             /*randChoiceBox.getItems().addAll("losowe", "równomierne", "z promieniem");
             randChoiceBox.setValue("losowe");*/
             startButton.setText("START!");
@@ -155,6 +158,7 @@ public class Controller {
     public void startFunction(){
         boolean isFinished;
         board.setPeriod(checkbox.isSelected());
+        board.setProbability(Integer.parseInt(rule4Probability.getText()));
         board.setNeighbourhoodType((String) choiceBox.getValue());
         isFinished = board.nextCycle();
         if(isFinished) {
@@ -628,14 +632,11 @@ public class Controller {
                     int cell_x = (int) x * width / (width * cellSize);
                     int cell_y = (int) y * height / (height * cellSizeY);
                     System.out.println("Cell nr: " + cell_x + ", " + cell_y);
-                    if (!board.getCellValue(cell_x, cell_y)) {
+                    if (board.getCellValue(cell_x, cell_y)) {
                         board.setCellValue(cell_x, cell_y, true);
                         board.setCellGrainType(cell_x, cell_y, colors.size() + 1);
 
-                        float r = rand.nextFloat();
-                        float g = rand.nextFloat();
-                        float b = rand.nextFloat();
-                        board.setCellColor(cell_x, cell_y, Color.color(r, g, b));
+                        //board.getCellColor()
                         colors.add(board.getCellColor(cell_x, cell_y));
                         gc.setFill(board.getCellColor(cell_x, cell_y));
                         gc.fillRect(x  - (x % cellSize), y  - (y % cellSize), cellSize, cellSizeY);

@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
+<?import javafx.scene.canvas.*?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<AnchorPane prefHeight="497.0" prefWidth="728.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+
+<AnchorPane prefHeight="640.0" prefWidth="987.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
    <children>
       <SplitPane dividerPositions="0.6906354515050167" layoutX="200.0" layoutY="127.0" prefHeight="497.0" prefWidth="728.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <items>
@@ -42,7 +45,7 @@
                   <Button fx:id="startButton" layoutX="7.0" layoutY="186.0" mnemonicParsing="false" onAction="#handleStart" prefHeight="31.0" prefWidth="172.0" text="START" />
                   <Button layoutX="7.0" layoutY="143.0" mnemonicParsing="false" onAction="#handleRand" prefHeight="31.0" prefWidth="172.0" text="RANDOM" />
                   <Button layoutX="7.0" layoutY="226.0" mnemonicParsing="false" onAction="#handleClear" prefHeight="31.0" prefWidth="172.0" text="CLEAR CANVAS" />
-                  <ChoiceBox fx:id="choiceBox" layoutX="36.0" layoutY="433.0" prefWidth="150.0" visible="false" />
+                  <ChoiceBox fx:id="choiceBox" layoutX="9.0" layoutY="503.0" prefHeight="31.0" prefWidth="172.0" />
                   <TextField fx:id="textField" layoutX="36.0" layoutY="392.0" visible="false" />
                   <Label layoutX="7.0" layoutY="4.0" text="Width" textFill="WHITE" />
                   <Label layoutX="103.0" layoutY="4.0" text="Height" textFill="WHITE" />
@@ -53,7 +56,9 @@
                   <Label layoutX="19.0" layoutY="345.0" text="Size" textFill="WHITE" />
                   <Label layoutX="19.0" layoutY="386.0" text="Type" textFill="WHITE" />
                   <ChoiceBox fx:id="inclusionsTypeChoiceBox" layoutX="77.0" layoutY="381.0" prefHeight="31.0" prefWidth="98.0" />
-                  <Button layoutX="9.0" layoutY="423.0" mnemonicParsing="false" onAction="#addInclusions" prefHeight="31.0" prefWidth="172.0" text="ADD INCLUSIONS" />
+                  <Button layoutX="7.0" layoutY="423.0" mnemonicParsing="false" onAction="#addInclusions" prefHeight="31.0" prefWidth="172.0" text="ADD INCLUSIONS" />
+                  <Label layoutX="15.0" layoutY="464.0" text="Rule 4 probability:" textFill="WHITE" />
+                  <TextField fx:id="rule4Probability" layoutX="137.0" layoutY="459.0" prefHeight="31.0" prefWidth="45.0" />
                </children>
             </AnchorPane>
         </items>

@@ -12,6 +12,7 @@ public class Board {
     private int width;
     private int height;
     private boolean period;
+    private int probability;
     private String neighbourhoodType;
     Random rand;
     public Board(int width, int height) {
@@ -111,9 +112,13 @@ public class Board {
         this.period = period;
     }
 
+    public void setProbability(int probability) {
+        this.probability = probability;
+    }
+
     // wykonanie aktualnej tury
     public boolean nextCycle() {
-        int[] cellInfo;//= new int[2];
+        int[] cellInfo = null;
         // kopiowanie aktualnego stanu
         Cell[][] newBoard = new Cell[width][height];
         for (int i = 0; i < width; i++) {
@@ -125,7 +130,10 @@ public class Board {
         // wykonanie akcji dla danej komorki
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                cellInfo = getGrainsGrowthType(i, j);
+                if(neighbourhoodType=="von Neumann'a")
+                    cellInfo = getGrainsGrowthType(i, j);
+                else if(neighbourhoodType=="Moore'a")
+                    cellInfo = getMooreGrainsGrowthType(i, j);
                 newBoard[i][j].changeState(cellInfo[0],cellInfo[1], cells[i][j].getTypeColor());
             }
         }
@@ -167,17 +175,19 @@ public class Board {
         Map<Integer,Integer> neighbours = new HashMap<>();
 
         int type=0;
+
+
             if (!period) {
                 int left = Math.max(i - 1, 0);
                 int up = Math.max(j - 1, 0);
                 int right = Math.min(i + 1, width - 1);
                 int down = Math.min(j + 1, height - 1);
-                int[] x= {left,i,right,i};
-                int[] y= {j, up, j, down};
+                int[] x = {left, i, right, i};
+                int[] y = {j, up, j, down};
                 for (int k = 0; k < 4; k++) {
 
-                        type = cells[x[k]][y[k]].getGrainType();
-                        getNeighboursInfo(neighbours,type);
+                    type = cells[x[k]][y[k]].getGrainType();
+                    getNeighboursInfo(neighbours, type);
                 }
             } else {
                 //periodycznie
@@ -185,8 +195,8 @@ public class Board {
                 int up = j - 1;
                 int right = i + 1;
                 int down = j + 1;
-                int[] x= {left,i,right,i};
-                int[] y= {j, up, j, down};
+                int[] x = {left, i, right, i};
+                int[] y = {j, up, j, down};
                 int tmpX, tmpY;
                 for (int k = 0; k < 4; k++) {
                     tmpX = x[k];
@@ -197,9 +207,10 @@ public class Board {
                     if (y[k] == height) tmpY = 0;
 
                     type = cells[tmpX][tmpY].getGrainType();
-                    getNeighboursInfo(neighbours,type);
+                    getNeighboursInfo(neighbours, type);
                 }
             }
+
         //max
         if(neighbours.isEmpty()) {
             info[1] = 0;
@@ -213,6 +224,83 @@ public class Board {
     }
 
     public void getNeighboursInfo(Map<Integer, Integer> neighbours, int type){
+        if (neighbours.containsKey(type)) {
+            int count = neighbours.get(type);
+            neighbours.put(type, count + 1);
+        } else if (type != 0 && type != -1) {
+            neighbours.put(type, 1);
+        }
+    }
+
+    public int[] getMooreGrainsGrowthType(int i, int j) {
+        int [] info = new int[2];
+        int [] maxInfo = new int[2];
+        Map<Integer,Integer> neighbours = new HashMap<>();
+
+        int type=0;
+
+        //periodycznie
+        int startX = i - 1;
+        int startY = j - 1;
+        int endX = i + 1;
+        int endY = j + 1;
+
+
+        for(int k =0; k<4; k++){
+            int counter = 0;
+            int tmpX, tmpY;
+            for (int x = startX; x <= endX; x++) {
+                for (int y = startY; y <= endY; y++) {
+                    if(k == 0 || (k == 1 && counter % 2 == 1) || (k == 2 && counter % 2 == 0 && counter!=4)) {
+                        tmpX = x;
+                        tmpY = y;
+                        if (x == -1) tmpX = width - 1;
+                        if (x == width) tmpX = 0;
+                        if (y == -1) tmpY = height - 1;
+                        if (y == height) tmpY = 0;
+
+
+                        type = cells[tmpX][tmpY].getGrainType();
+                        getMooreNeighboursInfo(neighbours, type);
+                    }
+                    counter++;
+                }
+            }
+
+
+            //max
+            if (neighbours.isEmpty()) {
+                info[1] = 0;
+                info[0] = 0;
+            } else {
+                info[1] = neighbours.entrySet().stream().max((entry1, entry2) -> entry1.getValue() > entry2.getValue() ? 1 : -1).get().getKey();
+                info[0] = neighbours.get(info[1]);
+                if(k == 0){
+                    maxInfo[0] = info[0];
+                    maxInfo[1] = info[1];
+                }
+            }
+
+            if ((k==0 && info[0] >= 5) || (k==1 && info[0] >=3) || (k==2 && info[0] >=3)) {
+                return info;
+            }else if(k==3){
+                if(rand.nextInt(101) < probability){
+                    return maxInfo;
+                }else{
+                    info[0] =0;
+                    info[1] = 0;
+                    return info;
+                }
+
+            }
+            neighbours.clear();
+
+        }
+
+        return info;
+    }
+
+    public void getMooreNeighboursInfo(Map<Integer, Integer> neighbours, int type){
         if (neighbours.containsKey(type)) {
             int count = neighbours.get(type);
             neighbours.put(type, count + 1);
