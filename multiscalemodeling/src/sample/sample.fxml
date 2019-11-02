@@ -36,7 +36,7 @@
                   </SplitPane>
                </children>
             </AnchorPane>
-          <AnchorPane maxWidth="190.0" minHeight="0.0" minWidth="190.0" prefHeight="398.0" prefWidth="190.0" style="-fx-background-color: #009688;">
+          <AnchorPane maxWidth="190.0" minHeight="0.0" minWidth="81.0" prefHeight="613.0" prefWidth="81.0" style="-fx-background-color: #009688;">
                <children>
                   <TextField layoutX="7.0" layoutY="24.0" prefHeight="31.0" prefWidth="77.0" fx:id="xTextField" />
                   <TextField fx:id="yTextField" layoutX="103.0" layoutY="24.0" prefHeight="31.0" prefWidth="77.0" />
@@ -59,6 +59,8 @@
                   <Button layoutX="7.0" layoutY="423.0" mnemonicParsing="false" onAction="#addInclusions" prefHeight="31.0" prefWidth="172.0" text="ADD INCLUSIONS" />
                   <Label layoutX="15.0" layoutY="464.0" text="Rule 4 probability:" textFill="WHITE" />
                   <TextField fx:id="rule4Probability" layoutX="137.0" layoutY="459.0" prefHeight="31.0" prefWidth="45.0" />
+                  <Button layoutX="10.0" layoutY="552.0" mnemonicParsing="false" onAction="#clearUnselectedGrains" prefHeight="31.0" prefWidth="172.0" text="CLEAR UNSELECTED" />
+                  <ChoiceBox fx:id="caAlgorithmType" layoutX="9.0" layoutY="599.0" prefHeight="31.0" prefWidth="172.0" />
                </children>
             </AnchorPane>
         </items>

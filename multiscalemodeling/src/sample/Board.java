@@ -2,9 +2,7 @@ package sample;
 
 import javafx.scene.paint.Color;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class Board {
 
@@ -14,12 +12,17 @@ public class Board {
     private boolean period;
     private int probability;
     private String neighbourhoodType;
+    private List<Integer> selectedGrains;
     Random rand;
+
+
+
     public Board(int width, int height) {
         this.width = width;
         this.height = height;
         cells = new Cell[width][height];
         rand = new Random();
+        selectedGrains = new ArrayList<>();
         resetAll();
     }
 
@@ -110,6 +113,14 @@ public class Board {
 
     public void setPeriod(boolean period) {
         this.period = period;
+    }
+
+    public List<Integer> getSelectedGrains() {
+        return selectedGrains;
+    }
+
+    public void setSelectedGrains(List<Integer> selectedGrains) {
+        this.selectedGrains = selectedGrains;
     }
 
     public void setProbability(int probability) {
@@ -227,7 +238,7 @@ public class Board {
         if (neighbours.containsKey(type)) {
             int count = neighbours.get(type);
             neighbours.put(type, count + 1);
-        } else if (type != 0 && type != -1) {
+        } else if (type != 0 && type != -1 && !selectedGrains.contains(type)) {
             neighbours.put(type, 1);
         }
     }
@@ -304,7 +315,7 @@ public class Board {
         if (neighbours.containsKey(type)) {
             int count = neighbours.get(type);
             neighbours.put(type, count + 1);
-        } else if (type != 0 && type != -1) {
+        } else if (type != 0 && type != -1 && !selectedGrains.contains(type)) {
             neighbours.put(type, 1);
         }
     }
