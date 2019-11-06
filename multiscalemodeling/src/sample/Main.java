@@ -22,6 +22,7 @@ public class Main extends Application {
 
         initRootLayout();
         showMainOverview();
+        primaryStage.setTitle("Grain growth");
         /*FXMLLoader loader = new FXMLLoader();
         loader.setLocation(Main.class.getResource("sample.fxml"));
         AnchorPane page = (AnchorPane) loader.load();
