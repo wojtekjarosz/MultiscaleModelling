@@ -891,6 +891,11 @@ public class Controller {
                     board.setCellGrainType(i,j,0);
                     gc.setFill(backgroundColor);
                     gc.fillRect(i*cellSize,j*cellSizeY,cellSize,cellSizeY);
+                }else{
+                    board.setCellValue(i,j,true);
+                    board.setCellGrainType(i,j,-1);
+                    gc.setFill(Color.BLACK);
+                    gc.fillRect(i*cellSize,j*cellSizeY,cellSize,cellSizeY);
                 }
             }
         }
