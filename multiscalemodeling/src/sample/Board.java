@@ -166,6 +166,18 @@ public class Board {
         return value;
     }
 
+    public double countPercentOfBoundaries(){
+        double value = 0.0;
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if(cells[i][j].getGrainType() == -1){
+                    value++;
+                }
+            }
+        }
+        return value*100/(double)(width*height);
+    }
+
     public double getProgress(){
         double max = width*height;
         int counter = 0;
