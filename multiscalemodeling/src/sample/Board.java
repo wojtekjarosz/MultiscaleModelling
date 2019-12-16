@@ -30,7 +30,7 @@ public class Board {
     private void resetAll() {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                cells[i][j] = new Cell(false, 0, null);
+                cells[i][j] = new Cell(false, 0, null, 0, false);
             }
         }
     }
@@ -77,6 +77,14 @@ public class Board {
         }
     }
 
+    public void setCellRecrystallized(int x, int y, boolean isRecrystallized) {
+        if (x >= 0 && y >= 0 && x < width && y < height) {
+            cells[x][y].setRecrystallized(isRecrystallized);
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
     // pobranie wartosci komorki
     public boolean getCellValue(int x, int y) {
         if (x >= 0 && y >= 0 && x < width && y < height) {
@@ -90,6 +98,30 @@ public class Board {
     public int getCellGrainType(int x, int y) {
         if (x >= 0 && y >= 0 && x < width && y < height) {
             return cells[x][y].getGrainType();
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    public int getCellGrainEnergy(int x, int y) {
+        if (x >= 0 && y >= 0 && x < width && y < height) {
+            return cells[x][y].getEnergy();
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    public void setCellGrainEnergy(int x, int y, int energy) {
+        if (x >= 0 && y >= 0 && x < width && y < height) {
+            cells[x][y].setEnergy(energy);
+        } else {
+            throw new IndexOutOfBoundsException();
+        }
+    }
+
+    public boolean isCellGrainRecrystallized(int x, int y) {
+        if (x >= 0 && y >= 0 && x < width && y < height) {
+            return cells[x][y].isRecrystallized();
         } else {
             throw new IndexOutOfBoundsException();
         }
@@ -145,7 +177,7 @@ public class Board {
                     cellInfo = getGrainsGrowthType(i, j);
                 else if(neighbourhoodType=="Moore'a")
                     cellInfo = getMooreGrainsGrowthType(i, j);
-                newBoard[i][j].changeState(cellInfo[0],cellInfo[1], cells[i][j].getTypeColor());
+                newBoard[i][j].changeState(cellInfo[0],cellInfo[1], cells[i][j].getTypeColor(), cells[i][j].getEnergy(), cells[i][j].isRecrystallized());
             }
         }
 
@@ -375,4 +407,50 @@ public class Board {
 
         return isOnBorder;
     }
+
+    public void distributeEnergy(int GB, int inside) {
+        for(int i =0; i< width; i++){
+            for(int j = 0; j<height; j++){
+                if(isCellOnBorder(i, j)){
+                    cells[i][j].setEnergy(GB);
+                }else{
+                    cells[i][j].setEnergy(inside);
+                }
+                cells[i][j].setRecrystallized(false);
+            }
+        }
+    }
+
+    public void addNucleons(boolean onlyOnGB, int amount, Map<Integer, Color> colors) {
+
+        int counter = 0;
+        while(counter < amount){
+
+            int x = rand.nextInt(width);
+            int y = rand.nextInt(height);
+            if(!cells[x][y].isRecrystallized() && (onlyOnGB && isCellOnBorder(x,y)) || !onlyOnGB){
+                int type = -1;
+                boolean chosen = false;
+                while(!chosen){
+                    type = rand.nextInt();
+                    if(!colors.containsKey(type))
+                        chosen = true;
+                }
+
+                System.out.println(type);
+                float r = rand.nextFloat();
+                //float g = rand.nextFloat();
+                //float b = rand.nextFloat();
+                colors.put(type, Color.color(r, 0, 0));
+
+                cells[x][y].setEnergy(0);
+                cells[x][y].setRecrystallized(true);
+                cells[x][y].setGrainType(type);
+                cells[x][y].setTypeColor(colors.get(type));
+                counter++;
+            }
+        }
+    }
+
+
 }

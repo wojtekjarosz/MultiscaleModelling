@@ -10,14 +10,14 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.CheckBox;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.omg.CORBA.INTERNAL;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,7 +33,6 @@ import static java.lang.Math.sqrt;
 public class Controller {
     int width = 400, height = 300;
     int cellSize, cellSizeY;
-    //int cellSize=(1200)/((width>height)? width : height);
     Board board;
     private Stage dialogStage;
     @FXML
@@ -43,19 +42,13 @@ public class Controller {
     @FXML
     ChoiceBox choiceBox;
     @FXML
-    ChoiceBox randChoiceBox;
-    @FXML
     Button startButton;
     @FXML
     Button mcButton;
     @FXML
-    TextField textField;
-    @FXML
     TextField xTextField;
     @FXML
     TextField yTextField;
-    @FXML
-    TextField rTextField;
     @FXML
     ProgressBar progressBar;
     @FXML
@@ -76,20 +69,33 @@ public class Controller {
     Label percentOfBoundaries;
     @FXML
     TextField mcNucleonsAmount;
-    int mcsCounter = 200000;
+    @FXML
+    TextField randTextField;
+    @FXML
+    TextField mcIterationsAmount;
+    @FXML
+    ChoiceBox mcNumberOfNucleonsType;
+    @FXML
+    CheckBox mcLocationType;
+    @FXML
+    TextField mcNumberOfNucleonsAmount, mcJ, mcInsideEnergy, mcGBEnergy;
+    @FXML
+    Button mcRecBtn;
+
     GraphicsContext gc;
     Random rand;
-    Thread thread, mcThread;
+    Thread thread, mcThread, mcRecrystallizationThread;
     Color cellColor = Color.SANDYBROWN;
     int greyValue = 245;
     Color backgroundColor = Color.rgb(greyValue,greyValue,greyValue);
-    private volatile boolean running = true;
-    private volatile boolean mcRunning = true;
-    //Color[] colors;
+    private boolean running = true;
+    private boolean mcRunning = true;
+    private boolean mcRecrystallizationRunning = true;
     Map<Integer, Color> colors;
     List<Point> points;
-
-
+    int mcCounter;
+    boolean firstIteration;
+    int mcNumberOfNucleons;
     private Main main;
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
@@ -102,8 +108,8 @@ public class Controller {
     public void initialize() {
         rand = new Random();
         xTextField.setText("150");
-
         yTextField.setText("150");
+        randTextField.setText("50");
         rule4Probability.setText("10");
         inclusionsAmountTextField.setText("5");
         inclusionsSizeTextField.setText("3");
@@ -115,18 +121,24 @@ public class Controller {
         caAlgorithmType.setValue("Substructure");
         boundaryWidth.setText("1");
         mcNucleonsAmount.setText("10");
+        mcIterationsAmount.setText("20");
+        mcNumberOfNucleonsType.getItems().addAll("Constant", "Increasing", "At the begining of simulation");
+        mcNumberOfNucleonsType.setValue("Constant");
+        mcLocationType.setSelected(true);
+        mcGBEnergy.setText("7");
+        mcInsideEnergy.setText("2");
+
         generate();
     }
     @FXML
     public void generate(){
         if(isInputValid()) {
-            cellSize = cellSizeY = 4;
+            cellSize = cellSizeY = 3;
             width = Integer.parseInt(xTextField.getText());
             height = Integer.parseInt(yTextField.getText());
 
             generateBoard(width,height,cellSize);
             checkbox.setSelected(true);
-            textField.setText(300 + "");
             startButton.setText("START!");
             percentOfBoundaries.setText("0%");
         }
@@ -194,10 +206,10 @@ public class Controller {
     @FXML
     public void handleRand(){
         if(isInputValid()) {
-            int numberOfCells = Integer.parseInt(textField.getText());
+            int numberOfCells = Integer.parseInt(randTextField.getText());
             if (numberOfCells > (width * height)) {
                 numberOfCells = width * height;
-                textField.setText(numberOfCells + "");
+                randTextField.setText(numberOfCells + "");
             }
             randFunc(numberOfCells);
         }
@@ -267,18 +279,28 @@ public class Controller {
 
     @FXML
     public void monteCarloHandle(){
+        mcCounter = Integer.parseInt(mcIterationsAmount.getText());
         points = new ArrayList<>();
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                int type = board.getCellGrainType(i,j);
+                if(!board.getSelectedGrains().containsKey(type))
+                    points.add(new Point(i,j));
+            }
+        }
         //startButton.setDisable(false);
         System.out.println(mcButton.getText());
         if(mcButton.getText().startsWith("START")) {
             mcRunning = true;
             mcThread = new Thread(() -> {
                 while (mcRunning) {
-                    Platform.runLater(() -> monteCarlo());
+                    Platform.runLater(() -> monteCarlo(false));
+
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
+                        System.out.println("Interrupted");
                     }
                 }
             });
@@ -291,112 +313,68 @@ public class Controller {
         }
     }
 
-    public void monteCarlo(){
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                points.add(new Point(i,j));
-            }
-        }
-        while (!points.isEmpty()) {
-            List<Integer> neighbors = new ArrayList();
-            int energieBefore = 0;
-            int energieAfter = 0;
-            int p = rand.nextInt(points.size());
-            int i = points.get(p).x;
-            int j = points.get(p).y;
-            points.remove(p);
-            //System.out.println("Komórka: "+i+","+j);
-            //System.out.println("Typ: "+board.getCellGrainType(i,j));
-            int type = board.getCellGrainType(i, j);
 
-            //periodycznie
 
-            int startX = i - 1;
-            int startY = j - 1;
-            int endX = i + 1;
-            int endY = j + 1;
-
-            int tmpX, tmpY;
-            for (int x = startX; x <= endX; x++) {
-                for (int y = startY; y <= endY; y++) {
-                    tmpX = x;
-                    tmpY = y;
-                    if (x == -1) tmpX = width - 1;
-                    if (x == width) tmpX = 0;
-                    if (y == -1) tmpY = height - 1;
-                    if (y == height) tmpY = 0;
-                    if (!(x == i && y == j)) {
-                        int neighborType = board.getCellGrainType(tmpX, tmpY);
-                        if (type != neighborType) {
-                            energieBefore++;
-                            if (!neighbors.contains(neighborType))
-                                neighbors.add(neighborType);
-                        }
+    private int countEnergy(int type, int i, int j, List<Integer> neighbors, boolean before, boolean recrystallization) {
+        int energy = 0;
+        int startX = i - 1;
+        int startY = j - 1;
+        int endX = i + 1;
+        int endY = j + 1;
+        boolean isRecrystallized;
+        int tmpX, tmpY;
+        for (int x = startX; x <= endX; x++) {
+            for (int y = startY; y <= endY; y++) {
+                tmpX = x;
+                tmpY = y;
+                if (x == -1) tmpX = width - 1;
+                if (x == width) tmpX = 0;
+                if (y == -1) tmpY = height - 1;
+                if (y == height) tmpY = 0;
+                if (!(x == i && y == j)) {
+                    int neighborType = board.getCellGrainType(tmpX, tmpY);
+                    isRecrystallized = board.isCellGrainRecrystallized(tmpX,tmpY);
+                    if(!isRecrystallized && recrystallization)
+                        continue;
+                    if (type != neighborType ) {
+                        energy++;
+                        if (!neighbors.contains(neighborType) && !board.getSelectedGrains().containsKey(neighborType) && before)
+                            neighbors.add(neighborType);
                     }
                 }
-
             }
 
-            if (neighbors.size() > 0) {
-                int chosenType = neighbors.get(rand.nextInt(neighbors.size()));
-
-
-                startX = i - 1;
-                startY = j - 1;
-                endX = i + 1;
-                endY = j + 1;
-
-                for (int x = startX; x <= endX; x++) {
-                    for (int y = startY; y <= endY; y++) {
-                        tmpX = x;
-                        tmpY = y;
-                        if (x == -1) tmpX = width - 1;
-                        if (x == width) tmpX = 0;
-                        if (y == -1) tmpY = height - 1;
-                        if (y == height) tmpY = 0;
-                        if (!(x == i && y == j)) {
-                            int neighborType = board.getCellGrainType(tmpX, tmpY);
-                            if (chosenType != neighborType)
-                                energieAfter++;
-                        }
-                    }
-
-                }
-                int deltaE = energieAfter - energieBefore;
-                if (deltaE <= 0) {
-                    board.setCellGrainType(i, j, chosenType);
-                    board.setCellColor(i, j, colors.get(chosenType));
-                    //gc.setFill(colors.get(chosenType));
-                    //gc.fillRect(i * cellSize, j * cellSizeY, cellSize, cellSizeY);
-                }
-            }
         }
-        mcsCounter--;
-        if(mcsCounter==0){
-            mcRunning = false;
-            mcButton.setText("START");
-        }
-        drawBoard();
+
+        return energy;
     }
+
 
     @FXML
     public void handleFillRandomly(){
-        handleClear();
+        //handleClear();
         //randFunc(width*height);
         Map<Integer,Color> colorsMap = new HashMap<>();
-        List<Integer> ids = new ArrayList<>();
 
         int amount = Integer.parseInt(mcNucleonsAmount.getText());
-
+        List<Integer> chosenTypes = new ArrayList<>();
+        for(int k=0; k<amount;k++){
+            int randType = rand.nextInt();
+            if(!chosenTypes.contains(randType) && !board.getSelectedGrains().containsKey(randType))
+                chosenTypes.add(randType);
+            else
+                k--;
+        }
         for(int i=0;i<width;i++) {
             for (int j = 0; j < height; j++) {
-                int type = rand.nextInt(amount);
+                int type = chosenTypes.get(rand.nextInt(chosenTypes.size()));
+                System.out.println(type);
                 float r = rand.nextFloat();
                 float g = rand.nextFloat();
                 float b = rand.nextFloat();
 
                 if (!colorsMap.containsKey(type)) {
-                    colorsMap.put(type, Color.color(r, g, b));
+                    colorsMap.put(type, Color.color(0, g, b));
                 }
 
                 //Color randomColor = new Color.(r, g, b);
@@ -766,7 +744,7 @@ public class Controller {
 
             if (numberOfInclusion > (width * height)) {
                 numberOfInclusion = width * height;
-                textField.setText(numberOfInclusion + "");
+                randTextField.setText(numberOfInclusion + "");
             }
             if (!board.isFinished()) {
                 randInclusion(numberOfInclusion, sizeOfInclusion, false);
@@ -974,6 +952,127 @@ public class Controller {
 
     }
 
+
+    @FXML
+    public void distributeEnergy(){
+        board.distributeEnergy(Integer.parseInt(mcGBEnergy.getText()), Integer.parseInt(mcInsideEnergy.getText()));
+    }
+    @FXML
+    public void monteCarloEnergyHandle(){
+
+        firstIteration = true;
+        mcNumberOfNucleons = Integer.parseInt(mcNumberOfNucleonsAmount.getText());
+        points = new ArrayList<>();
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                int type = board.getCellGrainType(i,j);
+                if(!board.getSelectedGrains().containsKey(type))
+                    points.add(new Point(i,j));
+            }
+        }
+        //recrystallization();
+        if(mcRecBtn.getText().startsWith("START")) {
+            mcRecrystallizationRunning = true;
+            mcRecrystallizationThread = new Thread(() -> {
+                while (mcRecrystallizationRunning) {
+                    Platform.runLater(() -> recrystallization());
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        //e.printStackTrace();
+                        System.out.println("Interrupted");
+                    }
+                }
+            });
+            mcRecrystallizationThread.start();
+            mcRecBtn.setText("STOP MC");
+        }else if(mcRecBtn.getText().startsWith("STOP")){
+            mcRecrystallizationRunning = false;
+            mcRecrystallizationThread.interrupt();
+            mcRecBtn.setText("START MC");
+        }
+
+    }
+
+    public void recrystallization(){
+        boolean atTheBeginning = mcNumberOfNucleonsType.getValue().toString().startsWith("At");
+        if(firstIteration || !atTheBeginning){
+            board.addNucleons(mcLocationType.isSelected(), mcNumberOfNucleons, colors);
+            if(mcNumberOfNucleonsType.getValue().toString().startsWith("Increasing")){
+                mcNumberOfNucleons+=mcNumberOfNucleons;
+            }else{
+                mcNumberOfNucleons = Integer.parseInt(mcNumberOfNucleonsAmount.getText());
+            }
+        }
+
+        monteCarlo(true);
+        drawBoard();
+        firstIteration = false;
+    }
+
+    @FXML
+    public void drawEnergy(){
+        for(int i=0;i<width;i++){
+            for (int j=0;j<height;j++){
+                if(board.getCellValue(i,j)){
+                    int energy = board.getCellGrainEnergy(i,j);
+                    if(energy == Integer.parseInt(mcInsideEnergy.getText()))
+                        gc.setFill(Color.BLUE);
+                    else if(energy == Integer.parseInt(mcGBEnergy.getText()))
+                        gc.setFill(Color.YELLOW);
+                    else if(energy == 0)
+                        gc.setFill(Color.RED);
+                    else
+                        gc.setFill(Color.MAGENTA);
+                    gc.fillRect(i*cellSize,j*cellSizeY,cellSize,cellSizeY);
+
+                }
+            }
+        }
+    }
+
+    public void monteCarlo(boolean recrystallization){
+
+
+        Collections.shuffle(points, new Random(3));
+        for(Point point : points) {
+            List<Integer> neighbors = new ArrayList();
+            int energyBefore = 0;
+            int energyAfter = 0;
+            int i = point.x;
+            int j = point.y;
+            int type = board.getCellGrainType(i, j);
+            energyBefore = countEnergy(type, i, j, neighbors, true, recrystallization);
+
+            if (neighbors.size() > 0) {
+                int chosenType = neighbors.get(rand.nextInt(neighbors.size()));
+                energyAfter = countEnergy(chosenType, i, j, neighbors, false, false);
+                if(recrystallization){
+                    int J = Integer.parseInt(mcJ.getText());
+                    energyAfter *= J;
+                    energyBefore *= J;
+                    energyBefore += board.getCellGrainEnergy(i,j);
+                }
+                int deltaE = energyAfter - energyBefore;
+                if (deltaE <= 0) {
+                    board.setCellGrainType(i,j,chosenType);
+                    board.setCellColor(i,j,colors.get(chosenType));
+                    if(recrystallization) {
+                        board.setCellRecrystallized(i,j,true);
+                        board.setCellGrainEnergy(i,j,0);
+                    }
+                }
+            }
+        }
+        mcCounter--;
+        if(mcCounter==0){
+            mcRunning = false;
+            mcButton.setText("START");
+            drawBoard();
+        }
+        //drawBoard();
+    }
 
 
 }
